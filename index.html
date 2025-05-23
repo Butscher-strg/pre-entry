@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verschlüsselte Seite</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #output {
+      margin-top: 20px;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔐 Geschützter Zugriff</h2>
+  <p>Gib das Passwort ein, um den geheimen Link zu entschlüsseln:</p>
+  <input type="password" id="password" placeholder="Passwort" />
+  <br />
+  <button onclick="decrypt()">Entschlüsseln</button>
+  <div id="output"></div>
+
+  <script>
+    function decrypt() {
+      var password = document.getElementById("password").value;
+      var hash = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex).substring(0, 32);
+      var key = CryptoJS.enc.Hex.parse(hash);
+      var iv = CryptoJS.enc.Base64.parse("p3LdqJvCJhJUxjFgoH6K0g==");
+      var encrypted = CryptoJS.enc.Base64.parse("hY11IL0b9mqLsylJXCfo7SNSGtZZ3/sfMoArYt7PAgc7HYK05943Zuaw5P5bn6toiASVEiZi5q7cF/nEmWSWKUbt4VhazyXBPqfu6zef2qg=");
+
+      try {
+        var decrypted = CryptoJS.AES.decrypt(
+          { ciphertext: encrypted },
+          key,
+          {
+            iv: iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7,
+          }
+        );
+        var result = decrypted.toString(CryptoJS.enc.Utf8);
+        if (result) {
+          document.getElementById("output").innerHTML =
+            '<p>✅ Entschlüsselt:</p><a href="' + result + '" target="_blank">' + result + '</a>';
+        } else {
+          throw "Ungültiges Passwort";
+        }
+      } catch (e) {
+        alert("❌ Entschlüsselung fehlgeschlagen. Falsches Passwort?");
+      }
+    }
+  </script>
+</body>
+</html>
